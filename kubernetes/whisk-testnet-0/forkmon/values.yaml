@@ -1,0 +1,57 @@
+# Ansible managed
+
+forkmon:
+  fullnameOverride: forkmon
+  image:
+    repository: skylenet/nodemonitor
+    tag: darkmode
+  ingress:
+    enabled: true
+    className: ingress-nginx-public
+    hosts:
+      - host: forkmon.whisk-testnet-0.ethpandaops.io
+        paths:
+          - path: /
+            pathType: Prefix
+  network: whisk-testnet-0
+  endpoints:
+  # Rpc
+  - addr: http://nethermind-lodestar-001:8545
+    name: rpc-lodestar-nethermind-001
+  - addr: https://<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.4844-devnets.node_ingress.combined}>@rpc.bootnode-1.srv.whisk-testnet-0.ethpandaops.io
+    name: bootnode-1
+  - addr: https://<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.4844-devnets.node_ingress.combined}>@rpc.lighthouse-geth-1.srv.whisk-testnet-0.ethpandaops.io
+    name: lighthouse-geth-1
+  - addr: https://<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.4844-devnets.node_ingress.combined}>@rpc.lighthouse-geth-10.srv.whisk-testnet-0.ethpandaops.io
+    name: lighthouse-geth-10
+  - addr: https://<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.4844-devnets.node_ingress.combined}>@rpc.lighthouse-geth-2.srv.whisk-testnet-0.ethpandaops.io
+    name: lighthouse-geth-2
+  - addr: https://<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.4844-devnets.node_ingress.combined}>@rpc.lighthouse-geth-3.srv.whisk-testnet-0.ethpandaops.io
+    name: lighthouse-geth-3
+  - addr: https://<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.4844-devnets.node_ingress.combined}>@rpc.lighthouse-geth-4.srv.whisk-testnet-0.ethpandaops.io
+    name: lighthouse-geth-4
+  - addr: https://<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.4844-devnets.node_ingress.combined}>@rpc.lighthouse-geth-5.srv.whisk-testnet-0.ethpandaops.io
+    name: lighthouse-geth-5
+  - addr: https://<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.4844-devnets.node_ingress.combined}>@rpc.lighthouse-geth-6.srv.whisk-testnet-0.ethpandaops.io
+    name: lighthouse-geth-6
+  - addr: https://<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.4844-devnets.node_ingress.combined}>@rpc.lighthouse-geth-7.srv.whisk-testnet-0.ethpandaops.io
+    name: lighthouse-geth-7
+  - addr: https://<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.4844-devnets.node_ingress.combined}>@rpc.lighthouse-geth-8.srv.whisk-testnet-0.ethpandaops.io
+    name: lighthouse-geth-8
+  - addr: https://<path:/secrets/services/services.enc.yaml#ethereum | jsonPath {.testnets.4844-devnets.node_ingress.combined}>@rpc.lighthouse-geth-9.srv.whisk-testnet-0.ethpandaops.io
+    name: lighthouse-geth-9
+
+  config: |
+    # How often to reload data from the nodes
+    reload_interval = "10s"
+    # If specified, a http server will serve static content here
+    server_address = "0.0.0.0:{{ .Values.httpPort}}"
+    # Shown in the document title, if specified
+    chain_name="{{ .Values.network }}"
+    # Local or non third party connection require rpc kind
+    {{- range .Values.endpoints }}
+    [[clients]]
+      url  = {{ .addr | quote }}
+      name = {{ .name | quote }}
+      kind = "rpc"
+    {{- end }}
