@@ -10,21 +10,12 @@ ansible_python_interpreter: /usr/bin/python3
 # role: ethpandaops.general.bootstrap
 bootstrap_user: root
 bootstrap_default_user_authorized_keys_github:
-  - dapplion
   # EF devops
   - barnabasbusa
   - parithosh
   - samcm
   - savid
   - skylenet
-  # LH
-  - AgeManning
-  - ethdreamer
-  - michaelsproul
-  - pawanjay176
-  - realbigsean
-  # Geth
-  - MariusVanDerWijden
 
 # role: robertdebock.fail2ban
 fail2ban_loglevel: INFO

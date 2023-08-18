@@ -11,30 +11,24 @@ eth_inventory_web_container_env:
 
 # role: ethpandaops.general.ethereum_node
 ethereum_node_el: geth
-ethereum_node_cl: teku
+ethereum_node_cl: lighthouse
 ethereum_node_cl_validator_enabled: false
 
-# role: ethpandaops.general.teku
-teku_container_name: beacon
-teku_container_image: "{{ default_ethereum_client_images.teku }}"
-teku_container_env:
+
+# role: ethpandaops.general.lighthouse
+lighthouse_container_name: beacon
+lighthouse_container_image: "{{ default_ethereum_client_images.lighthouse }}"
+lighthouse_container_env:
   VIRTUAL_HOST: "{{ ethereum_node_beacon_hostname }}"
   VIRTUAL_PORT: "{{ ethereum_node_cl_ports_http_beacon | string }}"
   LETSENCRYPT_HOST: "{{ ethereum_node_beacon_hostname }}"
-teku_container_volumes:
-  - "{{ teku_datadir }}:/data"
-  - "{{ teku_auth_jwt_path }}:/execution-auth.jwt:ro"
+lighthouse_container_volumes:
+  - "{{ lighthouse_datadir }}:/data"
+  - "{{ lighthouse_auth_jwt_path }}:/execution-auth.jwt:ro"
   - "{{ eth_testnet_config_dir }}:/network-config:ro"
-teku_container_command_extra_args:
-  - --network=/network-config/config.yaml
-  - --initial-state=/network-config/genesis.ssz
-  - --p2p-peer-upper-bound=100
-  - --data-storage-non-canonical-blocks-enabled=true
-  - --data-storage-mode=PRUNE
-  - --logging=info
-  - --Xlog-include-p2p-warnings-enabled
-  - --metrics-block-timing-tracking-enabled
-  # - --initial-state={{ checkpoint_sync_url }} # Need to remove genesis.ssz if using this
+lighthouse_container_command_extra_args:
+  - --testnet-dir=/network-config
+  - --debug-level=debug
 
 # role: ethpandaops.general.geth
 geth_container_name: execution
@@ -48,8 +42,8 @@ geth_container_command_extra_args:
   - --http.vhosts=*
   - --networkid={{ ethereum_network_id }}
   - --syncmode=full
-  - --bootnodes={{ ethereum_el_bootnodes | join(',') }}
   - --ethstats={{ inventory_hostname }}:{{ ethstats_secret }}@{{ ethstats_url }}
+
 geth_init_custom_network: true
 geth_init_custom_network_genesis_file: "{{ eth_testnet_config_dir }}/genesis.json"
 geth_container_pull: true
