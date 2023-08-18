@@ -12,7 +12,7 @@ variable "bootnode" {
 variable "lighthouse_geth" {
   default = {
     name            = "lighthouse-geth"
-    count           = 5
+    count           = 1
     validator_start = 0
     validator_end   = 25
   }
@@ -21,7 +21,7 @@ variable "lighthouse_geth" {
 variable "lighthouse_besu" {
   default = {
     name            = "lighthouse-besu"
-    count           = 2
+    count           = 1
     validator_start = 25
     validator_end   = 35
   }
@@ -30,7 +30,7 @@ variable "lighthouse_besu" {
 variable "lighthouse_nethermind" {
   default = {
     name            = "lighthouse-nethermind"
-    count           = 5
+    count           = 1
     validator_start = 35
     validator_end   = 60
   }

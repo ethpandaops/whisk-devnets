@@ -108,7 +108,7 @@ vm_group.validator_start) / vm_group.count), vm_group.validator_end)}"
 locals {
   hcloud_default_location    = "nbg1"
   hcloud_default_image       = "debian-11"
-  hcloud_default_server_type = "ccx42"
+  hcloud_default_server_type = "cpx21"
   hcloud_global_labels = [
     "Owner:Devops",
     "EthNetwork:${var.ethereum_network}"
@@ -131,7 +131,7 @@ locals {
         backups      = try(vm.backups, false)
         ansible_vars = try(vm.ansible_vars, null)
 
-        labels = concat(local.hcloud_global_labels, try(split(",", group.tags), []), try(split(",", vm.tags), []))
+        labels = concat(local.hcloud_global_labels, try(split(",", group.labels), []), try(split(",", vm.labels), []))
       }
     ]
   ])
@@ -169,6 +169,7 @@ resource "hcloud_server" "main" {
   location    = each.value.location
   ssh_keys    = each.value.ssh_keys
   backups     = each.value.backups
+  labels      = { for label in each.value.labels : split(":", label)[0] => split(":", label)[1] }
 }
 
 resource "hcloud_server_network" "main" {
@@ -232,12 +233,12 @@ resource "local_file" "ansible_inventory" {
     {
       ethereum_network_name = "${var.ethereum_network}"
       groups = merge(
-        { for group in local.hetzner_vm_groups : group => true... },
+        { for group in local.hetzner_vm_groups : "${group.id}" => true },
       )
       hosts = merge(
         {
-          for key, server in hcloud_server.main : "do.${key}" => {
-            ip              = server.ipv4_address
+          for key, server in hcloud_server.main : "hzn.${key}" => {
+            ip       = "${server.ipv4_address}"
             group           = try(split(":", tolist(server.labels)[2])[1], "unknown")
             validator_start = try(split(":", tolist(server.labels)[4])[1], 0)
             validator_end   = try(split(":", tolist(server.labels)[3])[1], 0) # if the tag is not a number it will be 0 - e.g no validator keys
