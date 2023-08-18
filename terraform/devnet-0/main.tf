@@ -11,6 +11,11 @@ terraform {
       source  = "cloudflare/cloudflare"
       version = "~> 3.0"
     }
+    hcloud = {
+      source  = "hetznercloud/hcloud"
+      version = "~> 1.42.1"
+    }
+  }
   }
 }
 
@@ -21,12 +26,8 @@ terraform {
     endpoint                    = "https://fra1.digitaloceanspaces.com"
     region                      = "us-east-1"
     bucket                      = "merge-testnets"
-    key                         = "infrastructure/devnet-0/terraform.tfstate"
+    key                         = "infrastructure/whisk-testnets/terraform.tfstate"
   }
-}
-
-provider "digitalocean" {
-  http_retry_max = 20
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -34,37 +35,26 @@ provider "digitalocean" {
 ////////////////////////////////////////////////////////////////////////////////////////
 variable "ethereum_network" {
   type    = string
-  default = "devnet-0"
+  default = "whisk-testnet-0"
 }
 
-variable "digitalocean_project_name" {
+
+
+variable "hcloud_ssh_key_name" {
   type    = string
-  default = "Template"
+  default = "shared-devops-eth2"
 }
 
-variable "digitalocean_ssh_key_name" {
-  type    = string
-  default = "examplesshkey"
+variable "regions": {
+    default = [
+    "nbg1" = { zone = "eu-central" },
+    "hel1" = { zone = "eu-central" },
+    "ash"  = { zone     = "us-east"},
+    "fsn1" = { zone = "eu-central" },
+    ]
 }
-
-
-variable "regions" {
-  default = [
-    "nyc1",
-    "sgp1",
-    "lon1",
-    "nyc3",
-    "ams3",
-    "fra1",
-    "tor1",
-    "blr1",
-    "sfo3",
-    "syd1"
-  ]
-}
-
 variable "base_cidr_block" {
-  default = "10.88.0.0/16"
+  default = "10.89.0.0/16"
 
 }
 
@@ -79,36 +69,20 @@ locals {
     var.lighthouse_nethermind,
     var.lighthouse_erigon,
     var.lighthouse_besu,
-    var.lighthouse_ethereumjs,
-    var.prysm_geth,
-    var.prysm_nethermind,
-    var.prysm_erigon,
-    var.prysm_besu,
-    var.prysm_ethereumjs,
-    var.lodestar_geth,
-    var.lodestar_nethermind,
-    var.lodestar_erigon,
-    var.lodestar_besu,
-    var.lodestar_ethereumjs,
-    var.nimbus_geth,
-    var.nimbus_nethermind,
-    var.nimbus_erigon,
-    var.nimbus_besu,
-    var.nimbus_ethereumjs,
-    var.teku_geth,
-    var.teku_nethermind,
-    var.teku_erigon,
-    var.teku_besu,
-    var.teku_ethereumjs
+    var.lighthouse_ethereumjs
   ]
 }
 
 locals {
-  base_cidr_block = var.base_cidr_block
-  digitalocean_vpcs = {
+  hetzner_network {
+          name     = "${var.ethereum_network}"
+          ip_range = var.base_cidr_block
+      }
+  hetzner_network_subnets = {
     for region in var.regions : region => {
       name     = "${var.ethereum_network}-${region}"
-      region   = region
+      type         = "cloud"
+      network_zone   = region.zone
       ip_range = cidrsubnet(local.base_cidr_block, 8, index(var.regions, region))
     }
   }
