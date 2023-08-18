@@ -229,6 +229,7 @@ resource "hcloud_server_network" "main" {
 ////////////////////////////////////////////////////////////////////////////////////////
 
 resource "local_file" "ansible_inventory" {
+  depends_on = [hcloud_server.main]
   content = templatefile("ansible_inventory.tmpl",
     {
       ethereum_network_name = "${var.ethereum_network}"
