@@ -110,8 +110,8 @@ locals {
   hcloud_default_image       = "debian-11"
   hcloud_default_server_type = "ccx42"
   hcloud_global_labels = [
-    "Owner=Devops",
-    "EthNetwork=var.ethereum_network"
+    "Owner:Devops",
+    "EthNetwork:${var.ethereum_network}"
   ]
 #  hcloud_global_labels_list = [for k, v in local.hcloud_global_labels : "${k}=${v}"]
 
@@ -169,7 +169,6 @@ resource "hcloud_server" "main" {
   location    = each.value.location
   ssh_keys    = each.value.ssh_keys
   backups     = each.value.backups
-  labels      = each.value.labels
 }
 
 resource "hcloud_server_network" "main" {
