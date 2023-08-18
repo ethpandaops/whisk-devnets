@@ -238,7 +238,7 @@ resource "local_file" "ansible_inventory" {
       )
       hosts = merge(
         {
-          for key, server in hcloud_server.main : "hzn.${key}" => {
+          for key, server in hcloud_server.main : "${key}" => {
             ip       = "${server.ipv4_address}"
             group           = try(split(":", tolist(server.labels)[2])[1], "unknown")
             validator_start = try(split(":", tolist(server.labels)[4])[1], 0)

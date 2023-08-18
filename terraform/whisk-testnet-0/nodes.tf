@@ -12,36 +12,36 @@ variable "bootnode" {
 variable "lighthouse_geth" {
   default = {
     name            = "lighthouse-geth"
-    count           = 1
+    count           = 10
     validator_start = 0
-    validator_end   = 25
+    validator_end   = 20000
   }
 }
 
 variable "lighthouse_besu" {
   default = {
     name            = "lighthouse-besu"
-    count           = 1
-    validator_start = 25
-    validator_end   = 35
+    count           = 0
+    validator_start = 0
+    validator_end   = 0
   }
 }
 
 variable "lighthouse_nethermind" {
   default = {
     name            = "lighthouse-nethermind"
-    count           = 1
-    validator_start = 35
-    validator_end   = 60
+    count           = 0
+    validator_start = 0
+    validator_end   = 0
   }
 }
 
 variable "lighthouse_ethereumjs" {
   default = {
     name            = "lighthouse-ethereumjs"
-    count           = 1
-    validator_start = 60
-    validator_end   = 80
+    count           = 0
+    validator_start = 0
+    validator_end   = 0
   }
 }
 
