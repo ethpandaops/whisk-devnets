@@ -82,5 +82,20 @@
   roles:
     - role: eth_post_network_setup
       tags: [eth_post_network_setup]
-    - role: gen_kubernetes_config
-      tags: [gen_kubernetes_config]
+
+- name: install beaconlight explorer
+  hosts: beaconlite
+  become: true
+  roles:
+    - role: beaconlight_explorer
+      tags: [beaconlight, explorer]
+      beaconlight_container_ports:
+        - "8080:8080"
+      beaconlight_container_volumes:
+        - "{{ beaconlight_datadir }}/explorer:/config"
+        - "{{ eth_testnet_config_dir }}:/testnet"
+      beaconlight_chain_name: ""
+      beaconlight_chain_config: "/testnet/config.yaml"
+      beaconlight_chain_displayname: "whisk-testnet-0"
+      beaconlight_frontend_subtitle: "Whisk Testnet"
+      beaconlight_beaconapi_endpoint: "http://beacon:5052"

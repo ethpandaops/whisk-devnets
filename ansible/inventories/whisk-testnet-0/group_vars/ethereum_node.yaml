@@ -58,3 +58,9 @@ prometheus_config: |
         - targets: ["{{ vars[ethereum_node_cl + '_container_name'] }}:{{ ethereum_node_cl_ports_metrics }}"]
           labels:
             instance: "{{ inventory_hostname }}"
+    - job_name: "validator"
+      metrics_path: "/metrics"
+      static_configs:
+        - targets: ["validator:{{ ethereum_node_cl_ports_metrics }}"]
+          labels:
+            instance: "{{ inventory_hostname }}"
