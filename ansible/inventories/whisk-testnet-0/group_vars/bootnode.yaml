@@ -29,6 +29,7 @@ lighthouse_container_volumes:
 lighthouse_container_command_extra_args:
   - --testnet-dir=/network-config
   - --debug-level=debug
+  - --slots-per-restore-point=32
 
 # role: ethpandaops.general.geth
 geth_container_name: execution
