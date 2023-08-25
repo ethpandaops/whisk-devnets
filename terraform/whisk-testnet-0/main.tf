@@ -30,6 +30,15 @@ terraform {
   }
 }
 
+provider "cloudflare" {
+  api_token = var.cloudflare_api_token
+}
+
+variable "cloudflare_api_token" {
+  type        = string
+  sensitive   = true
+  description = "Cloudflare API Token"
+}
 ////////////////////////////////////////////////////////////////////////////////////////
 //                                        VARIABLES
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -184,45 +193,65 @@ resource "hcloud_server_network" "main" {
 //                                   DNS NAMES
 ////////////////////////////////////////////////////////////////////////////////////////
 
-#data "cloudflare_zone" "default" {
-#  name = "ethpandaops.io"
-#}
+data "cloudflare_zone" "default" {
+  name = "ethpandaops.io"
+}
+
+resource "cloudflare_record" "server_record" {
+  for_each = {
+    for vm in local.hcloud_vms : "${vm.id}" => vm
+  }
+  zone_id = data.cloudflare_zone.default.id
+  name    = "${each.value.name}.srv.${var.ethereum_network}"
+  type    = "A"
+  value   = hcloud_server.main[each.value.id].ipv4_address
+  proxied = false
+  ttl     = 120
+}
+
+resource "cloudflare_record" "server_record_rpc" {
+  for_each = {
+    for vm in local.hcloud_vms : "${vm.id}" => vm
+  }
+  zone_id = data.cloudflare_zone.default.id
+  name    = "rpc.${each.value.name}.srv.${var.ethereum_network}"
+  type    = "A"
+  value   = hcloud_server.main[each.value.id].ipv4_address
+  proxied = false
+  ttl     = 120
+}
 #
-#resource "cloudflare_record" "server_record" {
-#  for_each = {
-#    for vm in local.digitalocean_vms : "${vm.id}" => vm
-#  }
-#  zone_id = data.cloudflare_zone.default.id
-#  name    = "${each.value.name}.srv.${var.ethereum_network}"
-#  type    = "A"
-#  value   = digitalocean_droplet.main[each.value.id].ipv4_address
-#  proxied = false
-#  ttl     = 120
-#}
-#
-#resource "cloudflare_record" "server_record_rpc" {
-#  for_each = {
-#    for vm in local.digitalocean_vms : "${vm.id}" => vm
-#  }
-#  zone_id = data.cloudflare_zone.default.id
-#  name    = "rpc.${each.value.name}.srv.${var.ethereum_network}"
-#  type    = "A"
-#  value   = digitalocean_droplet.main[each.value.id].ipv4_address
-#  proxied = false
-#  ttl     = 120
-#}
-#
-#resource "cloudflare_record" "server_record_beacon" {
-#  for_each = {
-#    for vm in local.digitalocean_vms : "${vm.id}" => vm
-#  }
-#  zone_id = data.cloudflare_zone.default.id
-#  name    = "bn.${each.value.name}.srv.${var.ethereum_network}"
-#  type    = "A"
-#  value   = digitalocean_droplet.main[each.value.id].ipv4_address
-#  proxied = false
-#  ttl     = 120
-#}
+resource "cloudflare_record" "server_record_beacon" {
+  for_each = {
+    for vm in local.hcloud_vms : "${vm.id}" => vm
+  }
+  zone_id = data.cloudflare_zone.default.id
+  name    = "bn.${each.value.name}.srv.${var.ethereum_network}"
+  type    = "A"
+  value   = hcloud_server.main[each.value.id].ipv4_address
+  proxied = false
+  ttl     = 120
+}
+
+resource "cloudflare_record" "server_record_beaconexplorer" {
+
+  zone_id = data.cloudflare_zone.default.id
+  name    = "beaconlite.${var.ethereum_network}"
+  type    = "A"
+  value   = "128.140.46.34"
+  proxied = false
+  ttl     = 120
+}
+
+resource "cloudflare_record" "server_record_landingpage" {
+
+  zone_id = data.cloudflare_zone.default.id
+  name    = "${var.ethereum_network}"
+  type    = "A"
+  value   = "128.140.46.34"
+  proxied = false
+  ttl     = 120
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////
 //                          GENERATED FILES AND OUTPUTS

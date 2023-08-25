@@ -102,4 +102,7 @@
       beaconlight_frontend_subtitle: "Whisk Testnet"
       beaconlight_beaconapi_endpoint: "http://beacon:5052"
       beaconlight_container_env:
-        WHISK_FORK_EPOCH: 0
+        WHISK_FORK_EPOCH: "0"
+        VIRTUAL_HOST: "{{ beaconlight_hostname }}"
+        VIRTUAL_PORT: "8080"
+        LETSENCRYPT_HOST: "{{ beaconlight_hostname }}"
