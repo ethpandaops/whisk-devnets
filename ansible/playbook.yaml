@@ -101,3 +101,5 @@
       beaconlight_chain_displayname: "whisk-testnet-0"
       beaconlight_frontend_subtitle: "Whisk Testnet"
       beaconlight_beaconapi_endpoint: "http://beacon:5052"
+      beaconlight_container_env:
+        WHISK_FORK_EPOCH: 0
