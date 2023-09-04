@@ -97,7 +97,7 @@ locals {
   }
   hetzner_network_subnets = {
     for region in var.hetzner_regions : region => {
-      zone   = "eu-central"
+      zone     = "eu-central"
       ip_range = cidrsubnet("10.89.0.0/16", 8, index(var.hetzner_regions, region))
     }
   }
@@ -134,7 +134,7 @@ locals {
     "Owner:Devops",
     "EthNetwork:${var.ethereum_network}"
   ]
-#  hcloud_global_labels_list = [for k, v in local.hcloud_global_labels : "${k}=${v}"]
+  #  hcloud_global_labels_list = [for k, v in local.hcloud_global_labels : "${k}=${v}"]
 
   # flatten vm_groups so that we can use it with for_each()
   hcloud_vms = flatten([
@@ -148,7 +148,7 @@ locals {
         ssh_keys     = try(vm.ssh_keys, [data.hcloud_ssh_key.main.id])
         location     = try(vm.region, try(group.location, local.hcloud_default_location))
         image        = try(vm.image, local.hcloud_default_image)
-        server_type         = try(vm.size, local.hcloud_default_server_type)
+        server_type  = try(vm.size, local.hcloud_default_server_type)
         backups      = try(vm.backups, false)
         ansible_vars = try(vm.ansible_vars, null)
 
@@ -258,7 +258,7 @@ resource "cloudflare_record" "server_record_beaconexplorer" {
 resource "cloudflare_record" "server_record_landingpage" {
 
   zone_id = data.cloudflare_zone.default.id
-  name    = "${var.ethereum_network}"
+  name    = var.ethereum_network
   type    = "A"
   value   = "128.140.46.34"
   proxied = false
