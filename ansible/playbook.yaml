@@ -85,7 +85,7 @@
     - role: eth_post_network_setup
       tags: [eth_post_network_setup]
 
-- name: install beaconlight explorer
+- name: Install beaconlight explorer
   hosts: beaconlite
   become: true
   roles:

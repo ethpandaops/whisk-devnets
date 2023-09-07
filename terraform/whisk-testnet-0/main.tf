@@ -39,6 +39,18 @@ variable "cloudflare_api_token" {
   sensitive   = true
   description = "Cloudflare API Token"
 }
+
+# Configure the Hetzner Cloud Provider
+provider "hcloud" {
+  token = var.hcloud_token
+}
+
+variable "hcloud_token" {
+  type        = string
+  description = "Hetzner Cloud API Token"
+  sensitive   = true
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////
 //                                        VARIABLES
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -47,14 +59,12 @@ variable "ethereum_network" {
   default = "whisk-testnet-0"
 }
 
-
-
 variable "hcloud_ssh_key_fingerprint" {
   type    = string
   default = "d6:76:2d:9c:5b:33:80:ff:0f:09:a2:10:9b:58:7e:dc"
 }
 
-variable "regions" {
+variable "hetzner_regions" {
   default = [
     "nbg1",
     "hel1",
@@ -80,15 +90,15 @@ locals {
 
 locals {
   hetzner_network = {
-    for region in var.regions : region => {
+    for region in var.hetzner_regions : region => {
       name     = "${var.ethereum_network}-${region}"
-      ip_range = cidrsubnet("10.89.0.0/16", 8, index(var.regions, region))
+      ip_range = cidrsubnet("10.89.0.0/16", 8, index(var.hetzner_regions, region))
     }
   }
   hetzner_network_subnets = {
-    for region in var.regions : region => {
-      zone   = "eu-central"
-      ip_range = cidrsubnet("10.89.0.0/16", 8, index(var.regions, region))
+    for region in var.hetzner_regions : region => {
+      zone     = "eu-central"
+      ip_range = cidrsubnet("10.89.0.0/16", 8, index(var.hetzner_regions, region))
     }
   }
 }
@@ -102,10 +112,12 @@ locals {
         id         = "${vm_group.name}-${i + 1}"
         vms = {
           "${i + 1}" = {
-            labels   = "group_name:${vm_group.name},val_start:${vm_group.validator_start + (i * (vm_group.validator_end - 
-vm_group.validator_start) / vm_group.count)},val_end:${min(vm_group.validator_start + ((i + 1) * (vm_group.validator_end - 
-vm_group.validator_start) / vm_group.count), vm_group.validator_end)}"
-            location = element(var.regions, i % length(var.regions))
+            labels = "group_name:${vm_group.name},val_start:${vm_group.validator_start + (i * (vm_group.validator_end -
+              vm_group.validator_start) / vm_group.count)},val_end:${min(vm_group.validator_start + ((i + 1) * (vm_group.validator_end -
+            vm_group.validator_start) / vm_group.count), vm_group.validator_end)}"
+            location     = element(var.hetzner_regions, i % length(var.hetzner_regions))
+            size         = try(vm_group.size, local.hcloud_default_server_type)
+            ansible_vars = try(vm_group.ansible_vars, null)
           }
 
         }
@@ -122,7 +134,7 @@ locals {
     "Owner:Devops",
     "EthNetwork:${var.ethereum_network}"
   ]
-#  hcloud_global_labels_list = [for k, v in local.hcloud_global_labels : "${k}=${v}"]
+  #  hcloud_global_labels_list = [for k, v in local.hcloud_global_labels : "${k}=${v}"]
 
   # flatten vm_groups so that we can use it with for_each()
   hcloud_vms = flatten([
@@ -136,7 +148,7 @@ locals {
         ssh_keys     = try(vm.ssh_keys, [data.hcloud_ssh_key.main.id])
         location     = try(vm.region, try(group.location, local.hcloud_default_location))
         image        = try(vm.image, local.hcloud_default_image)
-        server_type         = try(vm.size, local.hcloud_default_server_type)
+        server_type  = try(vm.size, local.hcloud_default_server_type)
         backups      = try(vm.backups, false)
         ansible_vars = try(vm.ansible_vars, null)
 
@@ -246,7 +258,7 @@ resource "cloudflare_record" "server_record_beaconexplorer" {
 resource "cloudflare_record" "server_record_landingpage" {
 
   zone_id = data.cloudflare_zone.default.id
-  name    = "${var.ethereum_network}"
+  name    = var.ethereum_network
   type    = "A"
   value   = "128.140.46.34"
   proxied = false
@@ -263,15 +275,15 @@ resource "local_file" "ansible_inventory" {
     {
       ethereum_network_name = "${var.ethereum_network}"
       groups = merge(
-        { for group in local.hetzner_vm_groups : "${group.id}" => true },
+        { for group in local.hetzner_vm_groups : "${group.group_name}" => true... },
       )
       hosts = merge(
         {
           for key, server in hcloud_server.main : "${key}" => {
-            ip       = "${server.ipv4_address}"
-            group           = try(split(":", tolist(server.labels)[2])[1], "unknown")
-            validator_start = try(split(":", tolist(server.labels)[4])[1], 0)
-            validator_end   = try(split(":", tolist(server.labels)[3])[1], 0) # if the tag is not a number it will be 0 - e.g no validator keys
+            ip              = server.ipv4_address
+            group           = server.labels.group_name
+            validator_start = server.labels.val_start
+            validator_end   = server.labels.val_end
             tags            = server.labels
             hostname        = split(".", key)[0]
             cloud           = "hetzner"
