@@ -86,7 +86,7 @@
       tags: [eth_post_network_setup]
 
 - name: Install dora-the-explorer
-  hosts: beaconlite
+  hosts: dora
   become: true
   roles:
     - role: dora_the_explorer
