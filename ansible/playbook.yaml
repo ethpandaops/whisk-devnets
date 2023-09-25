@@ -85,24 +85,24 @@
     - role: eth_post_network_setup
       tags: [eth_post_network_setup]
 
-- name: Install beaconlight explorer
-  hosts: beaconlite
+- name: Install dora-the-explorer
+  hosts: dora
   become: true
   roles:
-    - role: beaconlight_explorer
-      tags: [beaconlight, explorer]
-      beaconlight_container_ports:
+    - role: dora_the_explorer
+      tags: [dora, explorer]
+      dora_the_explorer_container_ports:
         - "8080:8080"
-      beaconlight_container_volumes:
-        - "{{ beaconlight_datadir }}/explorer:/config"
+      dora_the_explorer_container_volumes:
+        - "{{ dora_the_explorer_datadir }}/explorer:/config"
         - "{{ eth_testnet_config_dir }}:/testnet"
-      beaconlight_chain_name: ""
-      beaconlight_chain_config: "/testnet/config.yaml"
-      beaconlight_chain_displayname: "whisk-testnet-0"
-      beaconlight_frontend_subtitle: "Whisk Testnet"
-      beaconlight_beaconapi_endpoint: "http://beacon:5052"
-      beaconlight_container_env:
+      dora_the_explorer_chain_name: ""
+      dora_the_explorer_chain_config: "/testnet/config.yaml"
+      dora_the_explorer_chain_displayname: "whisk-testnet-0"
+      dora_the_explorer_frontend_subtitle: "Whisk Testnet"
+      dora_the_explorer_beaconapi_endpoint: "http://beacon:5052"
+      dora_the_explorer_container_env:
         WHISK_FORK_EPOCH: "0"
-        VIRTUAL_HOST: "{{ beaconlight_hostname }}"
+        VIRTUAL_HOST: "{{ dora_the_explorer_hostname }}"
         VIRTUAL_PORT: "8080"
-        LETSENCRYPT_HOST: "{{ beaconlight_hostname }}"
+        LETSENCRYPT_HOST: "{{ dora_the_explorer_hostname }}"
