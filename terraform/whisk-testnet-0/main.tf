@@ -23,7 +23,9 @@ terraform {
   backend "s3" {
     skip_credentials_validation = true
     skip_metadata_api_check     = true
-    endpoint                    = "https://fra1.digitaloceanspaces.com"
+    endpoints                   = { s3 = "https://fra1.digitaloceanspaces.com" }
+    skip_requesting_account_id  = true
+    skip_s3_checksum            = true
     region                      = "us-east-1"
     bucket                      = "merge-testnets"
     key                         = "infrastructure/whisk-testnets/terraform.tfstate"
@@ -42,10 +44,10 @@ variable "cloudflare_api_token" {
 
 # Configure the Hetzner Cloud Provider
 provider "hcloud" {
-  token = var.hcloud_token
+  token = var.whisk_hcloud_token
 }
 
-variable "hcloud_token" {
+variable "whisk_hcloud_token" {
   type        = string
   description = "Hetzner Cloud API Token"
   sensitive   = true
